@@ -1,7 +1,9 @@
 package fr.beneth.bouncysample;
 
 import java.io.File;
+import java.io.IOException;
 
+import org.apache.commons.io.FileUtils;
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.engines.SerpentEngine;
@@ -27,7 +29,7 @@ public class BouncySample {
         return rv;
     }
 
-    public static void main(String[] argv) {
+    public static void main(String[] argv) throws IOException {
         if (argv.length < 3) {
             System.out.println("Usage <file> <IV> <key>");
             System.exit(1);
@@ -38,8 +40,15 @@ public class BouncySample {
             System.out.println(String.format("File %s does not exist", argv[0]));
             System.exit(1);
         }
-
+        System.out.println(String.format("Trying to decrypt file %s with key %s ...",
+                argv[0], argv[2]));
         BouncySample bs = new BouncySample();
+
+        byte[] fb = FileUtils.readFileToByteArray(f);
+
+        byte[] outb = bs.decrypt(argv[2], fb);
+
+        FileUtils.writeByteArrayToFile(new File("decrypted"), outb);
 
     }
 }
