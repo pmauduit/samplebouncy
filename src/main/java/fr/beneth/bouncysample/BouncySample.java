@@ -3,22 +3,24 @@ package fr.beneth.bouncysample;
 import java.io.File;
 import java.io.IOException;
 
+import javax.xml.bind.DatatypeConverter;
+
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.crypto.BlockCipher;
-import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.engines.SerpentEngine;
 import org.bouncycastle.crypto.modes.CBCBlockCipher;
-import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
+import org.bouncycastle.crypto.modes.CTSBlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.crypto.params.ParametersWithIV;
 
 public class BouncySample {
 
     BlockCipher engine = new SerpentEngine();
 
-    public byte[] decrypt(String key2, byte[] cipherText) {
-        byte[] key = key2.getBytes();
-        BufferedBlockCipher cipher = new PaddedBufferedBlockCipher(new CBCBlockCipher(engine));
-        cipher.init(false, new KeyParameter(key));
+    public byte[] decrypt(String key2, byte[] iv, byte[] cipherText) {        
+        byte[] key = DatatypeConverter.parseHexBinary(key2);
+        CTSBlockCipher cipher = new CTSBlockCipher(new CBCBlockCipher(engine));
+        cipher.init(false, new ParametersWithIV(new KeyParameter(key), iv));
         byte[] rv = new byte[cipher.getOutputSize(cipherText.length)];
         int tam = cipher.processBytes(cipherText, 0, cipherText.length, rv, 0);
         try {
@@ -40,13 +42,15 @@ public class BouncySample {
             System.out.println(String.format("File %s does not exist", argv[0]));
             System.exit(1);
         }
-        System.out.println(String.format("Trying to decrypt file %s with key %s ...",
-                argv[0], argv[2]));
+        System.out.println(String.format("Trying to decrypt file %s with IV %s and  key %s ...",
+                argv[0], argv[1], argv[2]));
+
         BouncySample bs = new BouncySample();
 
         byte[] fb = FileUtils.readFileToByteArray(f);
-
-        byte[] outb = bs.decrypt(argv[2], fb);
+        byte[] iv = DatatypeConverter.parseHexBinary(argv[1]);
+        
+        byte[] outb = bs.decrypt(argv[2], iv, fb);
 
         FileUtils.writeByteArrayToFile(new File("decrypted"), outb);
 
