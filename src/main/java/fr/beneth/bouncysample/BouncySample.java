@@ -3,6 +3,7 @@ package fr.beneth.bouncysample;
 import java.io.File;
 import java.io.IOException;
 
+import javax.crypto.Cipher;
 import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.io.FileUtils;
@@ -31,7 +32,7 @@ public class BouncySample {
         return rv;
     }
 
-    public static void main(String[] argv) throws IOException {
+    public static void main(String[] argv) throws Exception {
         if (argv.length < 3) {
             System.out.println("Usage <file> <IV> <key>");
             System.exit(1);
@@ -54,5 +55,6 @@ public class BouncySample {
 
         FileUtils.writeByteArrayToFile(new File("decrypted"), outb);
 
+        System.out.println("Done.");
     }
 }
